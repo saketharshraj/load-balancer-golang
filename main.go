@@ -4,27 +4,10 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/http/httputil"
-	"net/url"
+
 )
 
-type server struct {
-	Name         string
-	URL          string
-	ReverseProxy *httputil.ReverseProxy
-	Health       bool
-}
 
-func newServer(name, urlStr string) *server {
-	u, _ := url.Parse(urlStr)
-	rp := httputil.NewSingleHostReverseProxy(u)
-	return &server{
-		Name:         name,
-		URL:          urlStr,
-		ReverseProxy: rp,
-		Health:       true,
-	}
-}
 
 
 var (
