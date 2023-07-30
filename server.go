@@ -18,8 +18,9 @@ func newServer(name, serverUrl string) *server {
 	rp := httputil.NewSingleHostReverseProxy(parsedUrl)
 	return &server{
 		Name:         name,
-		URL:          parsedUrl.String(),
+		URL:          serverUrl,
 		ReverseProxy: rp,
+		Health:       true,
 	}
 }
 
