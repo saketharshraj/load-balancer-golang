@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -40,7 +41,9 @@ var (
 func handleRequest(w http.ResponseWriter, r *http.Request) {
 	server := serverList[lastServedIndex]
 	server.ReverseProxy.ServeHTTP(w, r)
-	lastServedIndex ++;
+	fmt.Printf("Used server %d for handling request\n", lastServedIndex+1)
+	lastServedIndex = (lastServedIndex + 1) % len(serverList);
+	
 }
 
 func main() {
