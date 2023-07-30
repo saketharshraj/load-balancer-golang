@@ -1,24 +1,51 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 )
 
 
+type Config struct {
+	Servers []*server `json:"servers"`
+}
+
 var (
-	serverList = []*server{
-		newServer("server-1", "http://127.0.0.1:5001"),
-		newServer("server-2", "http://127.0.0.1:5002"),
-		newServer("server-3", "http://127.0.0.1:5003"),
-		newServer("server-4", "http://127.0.0.1:5004"),
-		newServer("server-5", "http://127.0.0.1:5005"),
-	}
+	serverList       []*server
 	lastServedIndex = 0
 )
 
+func loadConfig(filename string) (*Config, error) {
+	file, err := os.Open(filename)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var config Config
+	err = json.NewDecoder(file).Decode(&config)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Initialize ReverseProxy for each server in the config using the newServer function
+	for _, server := range config.Servers {
+		server.ReverseProxy = newServer(server.Name, server.URL).ReverseProxy
+	}
+	return &config, nil
+}
+
 func main() {
+	config, err :=loadConfig("config.json")
+	if err != nil {
+		log.Fatalf("Error loading configuration: %v", err)
+	}
+
+	serverList = config.Servers
 	http.HandleFunc("/", handleRequest)
 	go startHealthCheck()
 	log.Fatal(http.ListenAndServe(":8000", nil))
